@@ -1,0 +1,8 @@
+C:\terrain\obj\Debug\net8.0\terrain.GeneratedMSBuildEditorConfig.editorconfig
+C:\terrain\obj\Debug\net8.0\terrain.AssemblyInfoInputs.cache
+C:\terrain\obj\Debug\net8.0\terrain.AssemblyInfo.cs
+C:\terrain\obj\Debug\net8.0\terrain.csproj.CoreCompileInputs.cache
+C:\terrain\obj\Debug\net8.0\terrain.MvcApplicationPartsAssemblyInfo.cache
+C:\terrain\obj\Debug\net8.0\terrain.RazorAssemblyInfo.cache
+C:\terrain\obj\Debug\net8.0\terrain.RazorAssemblyInfo.cs
+C:\terrain\obj\Debug\net8.0\terrain.csproj.AssemblyReference.cache
