@@ -1,13 +1,32 @@
-namespace terrain
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace terrain.Models
 {
     public class User
     {
         public int Id { get; set; } = 0;
-        public string Nom { get; set; } = string.Empty;
-        public string Prenom { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public int Numero { get; set; } = 0;
-        public string Password { get; set; } = string.Empty;
-    }
 
+        [Required]
+        [StringLength(100)]
+        [Column(TypeName = "varchar(100)")]
+        public string Nom { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(100)]
+        [Column(TypeName = "varchar(100)")]
+        public string Prenom { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        [Column(TypeName = "varchar(255)")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(15)]
+        [Column(TypeName = "varchar(15)")]
+        public string Password { get; set; } = string.Empty;
+
+        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+    }
 }
