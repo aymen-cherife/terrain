@@ -1,69 +1,71 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using terrain.Models;
 using System.ComponentModel.DataAnnotations;
+using terrain.Models;
 
 namespace terrain.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class UserAuthController : ControllerBase
+    public class UserAuthController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
 
-        public UserAuthController(ApplicationDbContext context, IConfiguration configuration)
+        public UserAuthController(ApplicationDbContext context)
         {
             _context = context;
-            _configuration = configuration;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        // View for Register
+        [HttpGet]
+        public IActionResult Register()
         {
-            var user = new User { Email = model.Email, Nom = model.Nom, Prenom = model.Prenom, Password = BCrypt.Net.BCrypt.HashPassword(model.Password) };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return Ok();
+            return View();
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginModel model)
+        // Handling registration
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterModel model)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == model.Email);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
+            if (ModelState.IsValid)
             {
-                return Unauthorized();
+                var user = new User
+                {
+                    Email = model.Email,
+                    Nom = model.Nom,
+                    Prenom = model.Prenom,
+                    Password = BCrypt.Net.BCrypt.HashPassword(model.Password)
+                };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Login");
             }
-
-            var token = GenerateJwtToken(user.Email);
-            return Ok(new { token });
+            return View(model);
         }
 
-        private string GenerateJwtToken(string email)
+        // View for Login
+        [HttpGet]
+        public IActionResult Login()
         {
-            var claims = new[]
+            return View();
+        }
+
+        // Handling login
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(UserLoginModel model)
+        {
+            if (ModelState.IsValid)
             {
-                new Claim(JwtRegisteredClaimNames.Sub, email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddDays(30),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == model.Email);
+                if (user != null && BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
+                {
+                    // Simulating token generation for demonstration purposes
+                    TempData["Message"] = "Login successful!";
+                    return RedirectToAction("Index", "Home");
+                }
+                ModelState.AddModelError("", "Invalid login attempt.");
+            }
+            return View(model);
         }
     }
 
@@ -74,8 +76,8 @@ namespace terrain.Controllers
         public string Email { get; set; } = string.Empty;
 
         [Required]
-        public string Password { get; set; }
- = string.Empty;
+        public string Password { get; set; } = string.Empty;
+
         [Required]
         public string Nom { get; set; } = string.Empty;
 
