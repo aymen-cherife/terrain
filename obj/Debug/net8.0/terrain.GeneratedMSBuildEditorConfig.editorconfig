@@ -30,8 +30,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlclxSZXNlcnZhdGlvblxjcnVkX3RlbXBsYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/terrain/Views/Manager/Terrain/crud_template.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlclxUZXJyYWluXGNydWRfdGVtcGxhdGUuY3NodG1s
+[C:/terrain/Views/Manager/Terrain/crud_terrain.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlclxUZXJyYWluXGNydWRfdGVycmFpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/terrain/Views/Manager/User/crud_template.cshtml]

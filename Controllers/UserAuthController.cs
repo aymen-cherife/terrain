@@ -18,7 +18,7 @@ namespace terrain.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            return View();
+            return View("~/Views/User/Auth/register.cshtml");
         }
 
         // Handling registration
@@ -39,14 +39,14 @@ namespace terrain.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Login");
             }
-            return View(model);
+            return View("~/Views/User/Auth/register.cshtml", model);
         }
 
         // View for Login
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            return View("~/Views/User/Auth/Login.cshtml");
         }
 
         // Handling login
@@ -65,7 +65,7 @@ namespace terrain.Controllers
                 }
                 ModelState.AddModelError("", "Invalid login attempt.");
             }
-            return View(model);
+            return View("~/Views/User/Auth/Login.cshtml", model);
         }
     }
 

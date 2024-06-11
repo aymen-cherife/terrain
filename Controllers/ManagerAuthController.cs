@@ -13,12 +13,17 @@ namespace terrain.Controllers
         {
             _context = context;
         }
+        // View for dashboard
+        public IActionResult Index()
+        {
+            return View("~/Views/Manager/index.cshtml");
+        }
 
         // View for Login
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            return View("~/Views/Manager/Auth/Login.cshtml");
         }
 
         // Handling login
@@ -33,11 +38,11 @@ namespace terrain.Controllers
                 {
                     // Simulating token generation for demonstration purposes
                     TempData["Message"] = "Login successful!";
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Manager");
                 }
                 ModelState.AddModelError("", "Invalid login attempt.");
             }
-            return View(model);
+            return View("~/Views/Manager/Auth/Login.cshtml", model);
         }
     }
 

@@ -151,3 +151,4 @@ C:\terrain\obj\Debug\net8.0\terrain.genruntimeconfig.cache
 C:\terrain\obj\Debug\net8.0\ref\terrain.dll
 C:\terrain\bin\Debug\net8.0\MySqlConnector.dll
 C:\terrain\bin\Debug\net8.0\Pomelo.EntityFrameworkCore.MySql.dll
+C:\terrain\bin\Debug\net8.0\BCrypt.Net-Next.dll

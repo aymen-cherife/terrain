@@ -23,8 +23,8 @@ namespace terrain.Models
         public string Email { get; set; } = string.Empty;
 
         [Required]
-        [StringLength(15)]
-        [Column(TypeName = "varchar(15)")]
+        [StringLength(255)]
+        [Column(TypeName = "varchar(255)")]  // Increase size to accommodate BCrypt hash
         public string Password { get; set; } = string.Empty;
 
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();

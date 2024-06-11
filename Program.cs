@@ -49,4 +49,19 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+app.MapControllerRoute(
+    name: "user_register",
+    pattern: "User/Register",
+    defaults: new { controller = "UserAuth", action = "Register" });
+
+app.MapControllerRoute(
+    name: "user_login",
+    pattern: "User/Login",
+    defaults: new { controller = "UserAuth", action = "Login" });
+
+app.MapControllerRoute(
+name: "manager_login",
+pattern: "Manager/Login",
+defaults: new { controller = "ManagerAuth", action = "Login" });
+
 app.Run();

@@ -5,7 +5,7 @@ using terrain.Models;
 
 namespace terrain.Controllers
 {
-    [Authorize(Roles = "Manager")] // Restrict access to managers only
+
     public class TerrainsController : Controller
     {
         private readonly ApplicationDbContext _context;
