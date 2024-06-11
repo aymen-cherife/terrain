@@ -5,10 +5,8 @@ using terrain.Models;
 
 namespace terrain.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
     [Authorize(Roles = "Manager")] // Restrict access to managers only
-    public class TerrainsController : ControllerBase
+    public class TerrainsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
@@ -17,81 +15,117 @@ namespace terrain.Controllers
             _context = context;
         }
 
-        // GET: api/Terrains
+        // View for displaying all terrains
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Terrain>>> GetTerrains()
+        public async Task<IActionResult> Index()
         {
-            return await _context.Terrains.ToListAsync();
+            var terrains = await _context.Terrains.ToListAsync();
+            return View(terrains);
         }
 
-        // GET: api/Terrains/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Terrain>> GetTerrain(int id)
+        // View for details of a single terrain
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
         {
             var terrain = await _context.Terrains.FindAsync(id);
-
             if (terrain == null)
             {
                 return NotFound();
             }
-
-            return terrain;
+            return View(terrain);
         }
 
-        // POST: api/Terrains
-        [HttpPost]
-        public async Task<ActionResult<Terrain>> PostTerrain(Terrain terrain)
+        // View for creating a new terrain
+        [HttpGet]
+        public IActionResult Create()
         {
-            _context.Terrains.Add(terrain);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetTerrain), new { id = terrain.Id }, terrain);
+            return View();
         }
 
-        // PUT: api/Terrains/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTerrain(int id, Terrain terrain)
+        // Handling creation of a new terrain
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Terrain terrain)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Terrains.Add(terrain);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(terrain);
+        }
+
+        // View for editing an existing terrain
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var terrain = await _context.Terrains.FindAsync(id);
+            if (terrain == null)
+            {
+                return NotFound();
+            }
+            return View(terrain);
+        }
+
+        // Handling updates to an existing terrain
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Terrain terrain)
         {
             if (id != terrain.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(terrain).State = EntityState.Modified;
-
-            try
+            if (ModelState.IsValid)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TerrainExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                _context.Entry(terrain).State = EntityState.Modified;
 
-            return NoContent();
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!TerrainExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(terrain);
         }
 
-        // DELETE: api/Terrains/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTerrain(int id)
+        // View for deleting a terrain
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
         {
             var terrain = await _context.Terrains.FindAsync(id);
             if (terrain == null)
             {
                 return NotFound();
             }
+            return View(terrain);
+        }
 
-            _context.Terrains.Remove(terrain);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+        // Handling deletion of a terrain
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var terrain = await _context.Terrains.FindAsync(id);
+            if (terrain != null)
+            {
+                _context.Terrains.Remove(terrain);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         private bool TerrainExists(int id)

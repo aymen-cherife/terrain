@@ -6,10 +6,8 @@ using System.Security.Claims;
 
 namespace terrain.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
     [Authorize]
-    public class ReservationsController : ControllerBase
+    public class ReservationsController : Controller
     {
         private readonly ApplicationDbContext _context;
 
@@ -18,17 +16,18 @@ namespace terrain.Controllers
             _context = context;
         }
 
-        // GET: api/Reservations
+        // View for displaying all reservations
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Reservation>>> GetReservations()
+        public async Task<IActionResult> Index()
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            return await _context.Reservations.Where(r => r.UserId == userId).ToListAsync();
+            var reservations = await _context.Reservations.Where(r => r.UserId == userId).ToListAsync();
+            return View(reservations);
         }
 
-        // GET: api/Reservations/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Reservation>> GetReservation(int id)
+        // View for details of a single reservation
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var reservation = await _context.Reservations.FindAsync(id);
@@ -38,72 +37,111 @@ namespace terrain.Controllers
                 return NotFound();
             }
 
-            return reservation;
+            return View(reservation);
         }
 
-        // POST: api/Reservations
+        // View for creating a new reservation
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // Handling creation of a new reservation
         [HttpPost]
-        public async Task<ActionResult<Reservation>> PostReservation(Reservation reservation)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Reservation reservation)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             reservation.UserId = userId;
-            _context.Reservations.Add(reservation);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetReservation), new { id = reservation.Id }, reservation);
+            if (ModelState.IsValid)
+            {
+                _context.Reservations.Add(reservation);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(reservation);
         }
 
-        // PUT: api/Reservations/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutReservation(int id, Reservation reservation)
+        // View for editing an existing reservation
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id != reservation.Id)
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var reservation = await _context.Reservations.FindAsync(id);
+
+            if (reservation == null || reservation.UserId != userId)
+            {
+                return NotFound();
+            }
+            return View(reservation);
+        }
+
+        // Handling updates to an existing reservation
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Reservation reservation)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            if (id != reservation.Id || reservation.UserId != userId)
             {
                 return BadRequest();
             }
 
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            if (reservation.UserId != userId)
+            if (ModelState.IsValid)
             {
-                return Unauthorized();
-            }
+                _context.Entry(reservation).State = EntityState.Modified;
 
-            _context.Entry(reservation).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ReservationExists(id))
+                try
                 {
-                    return NotFound();
+                    await _context.SaveChangesAsync();
                 }
-                else
+                catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    if (!ReservationExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
+                return RedirectToAction(nameof(Index));
             }
-
-            return NoContent();
+            return View(reservation);
         }
 
-        // DELETE: api/Reservations/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReservation(int id)
+        // View for deleting a reservation
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var reservation = await _context.Reservations.FindAsync(id);
+
             if (reservation == null || reservation.UserId != userId)
             {
                 return NotFound();
             }
+            return View(reservation);
+        }
 
-            _context.Reservations.Remove(reservation);
-            await _context.SaveChangesAsync();
+        // Handling deletion of a reservation
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var reservation = await _context.Reservations.FindAsync(id);
 
-            return NoContent();
+            if (reservation != null && reservation.UserId == userId)
+            {
+                _context.Reservations.Remove(reservation);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         private bool ReservationExists(int id)
