@@ -33,7 +33,7 @@ namespace terrain.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        public async Task<IActionResult> Login([FromBody] UserLoginModel model)
         {
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == model.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
@@ -71,25 +71,25 @@ namespace terrain.Controllers
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         public string Password { get; set; }
+ = string.Empty;
+        [Required]
+        public string Nom { get; set; } = string.Empty;
 
         [Required]
-        public string Nom { get; set; }
-
-        [Required]
-        public string Prenom { get; set; }
+        public string Prenom { get; set; } = string.Empty;
     }
 
-    public class LoginModel
+    public class UserLoginModel
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
     }
 }

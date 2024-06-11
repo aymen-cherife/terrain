@@ -23,9 +23,9 @@ namespace terrain.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        public async Task<IActionResult> Login([FromBody] ManagerLoginModel model)
         {
-            var manager = await _context.Managers.SingleOrDefaultAsync(m => m.Nom == model.Email);
+            var manager = await _context.Managers.SingleOrDefaultAsync(m => m.Nom == model.Name);
             if (manager == null || !BCrypt.Net.BCrypt.Verify(model.Password, manager.Password))
             {
                 return Unauthorized();
@@ -57,13 +57,12 @@ namespace terrain.Controllers
         }
     }
 
-    public class LoginModel
+    public class ManagerLoginModel
     {
         [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
     }
 }
