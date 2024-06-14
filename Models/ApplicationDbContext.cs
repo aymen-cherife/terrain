@@ -13,6 +13,7 @@ namespace terrain
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Manager> Managers { get; set; }
+        public DbSet<ReservationDate> ReservationDates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,9 +28,20 @@ namespace terrain
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reservations)
                 .HasForeignKey(r => r.UserId);
-            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Reservation>()
+                .HasOne(r => r.ReservationDate)
+                .WithMany()
+                .HasForeignKey(r => r.ReservationDateId);
+
+            modelBuilder.Entity<ReservationDate>()
+                .HasOne(rd => rd.Terrain)
+                .WithMany()
+                .HasForeignKey(rd => rd.TerrainId);
+
             modelBuilder.Entity<User>().ToTable("Users");
             modelBuilder.Entity<Manager>().ToTable("Managers");
+            modelBuilder.Entity<Terrain>().ToTable("Terrains");
 
             // Seed initial manager
             modelBuilder.Entity<Manager>().HasData(new Manager
@@ -39,5 +51,6 @@ namespace terrain
                 Password = BCrypt.Net.BCrypt.HashPassword("initialPassword")
             });
         }
+
     }
 }

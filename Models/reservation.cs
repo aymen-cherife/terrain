@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace terrain.Models
 {
@@ -7,22 +8,24 @@ namespace terrain.Models
     {
         public int Id { get; set; } = 0;
 
-        [Required]
-        public DateTime Date { get; set; }
+        [ForeignKey("ReservationDate")]
+        public int ReservationDateId { get; set; }
 
-        [Required]
-        public DateTime HeureDebut { get; set; }
+        [ValidateNever]
+        public ReservationDate ReservationDate { get; set; } = null!;  // Ensuring non-null initialization
+
 
         [ForeignKey("Terrain")]
         public int TerrainId { get; set; }
 
-        [Required]
+        [ValidateNever]
         public Terrain Terrain { get; set; } = null!;  // Ensuring non-null initialization
 
         [ForeignKey("User")]
         public int UserId { get; set; }
 
-        [Required]
+        [ValidateNever]
         public User User { get; set; } = null!;  // Ensuring non-null initialization
     }
+
 }

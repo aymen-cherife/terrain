@@ -49,6 +49,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+//User routes : 
+
 app.MapControllerRoute(
     name: "user_register",
     pattern: "User/Register",
@@ -58,10 +60,23 @@ app.MapControllerRoute(
     name: "user_login",
     pattern: "User/Login",
     defaults: new { controller = "UserAuth", action = "Login" });
-
+//Manager routes : 
 app.MapControllerRoute(
 name: "manager_login",
 pattern: "Manager/Login",
 defaults: new { controller = "ManagerAuth", action = "Login" });
 
+//Terrain routes : 
+
+app.MapControllerRoute(
+name: "Terrain_CRUD_table",
+pattern: "Manager/Terrains",
+defaults: new { controller = "Terrains", action = "Index" });
+
+//Reservation routes : 
+
+app.MapControllerRoute(
+name: "Reservation_CRUD_table",
+pattern: "Manager/Reservations",
+defaults: new { controller = "Reservations", action = "ManagerIndex" });
 app.Run();

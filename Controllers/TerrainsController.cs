@@ -20,27 +20,12 @@ namespace terrain.Controllers
         public async Task<IActionResult> Index()
         {
             var terrains = await _context.Terrains.ToListAsync();
-            return View(terrains);
+            return View("~/Views/Manager/Terrain/index.cshtml", terrains);
         }
 
-        // View for details of a single terrain
-        [HttpGet]
-        public async Task<IActionResult> Details(int id)
-        {
-            var terrain = await _context.Terrains.FindAsync(id);
-            if (terrain == null)
-            {
-                return NotFound();
-            }
-            return View(terrain);
-        }
 
-        // View for creating a new terrain
-        [HttpGet]
-        public IActionResult Create()
-        {
-            return View();
-        }
+
+
 
         // Handling creation of a new terrain
         [HttpPost]

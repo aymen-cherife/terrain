@@ -26,12 +26,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlclxpbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/terrain/Views/Manager/Reservation/crud_template.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlclxSZXNlcnZhdGlvblxjcnVkX3RlbXBsYXRlLmNzaHRtbA==
+[C:/terrain/Views/Manager/Reservation/index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlclxSZXNlcnZhdGlvblxpbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/terrain/Views/Manager/Terrain/crud_terrain.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlclxUZXJyYWluXGNydWRfdGVycmFpbi5jc2h0bWw=
+[C:/terrain/Views/Manager/Terrain/index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFuYWdlclxUZXJyYWluXGluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/terrain/Views/Manager/User/crud_template.cshtml]
