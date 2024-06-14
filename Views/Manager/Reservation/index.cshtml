@@ -340,8 +340,7 @@
 						<div class="col-sm-6">
 							<a href="#addReservationModal" class="btn btn-success" data-toggle="modal"><i
 									class="material-icons">&#xE147;</i> <span>Add New Reservation</span></a>
-							<a href="#deleteReservationModal" class="btn btn-danger" data-toggle="modal"><i
-									class="material-icons">&#xE15C;</i> <span>Delete</span></a>
+
 						</div>
 					</div>
 				</div>
@@ -349,10 +348,7 @@
 					<thead>
 						<tr>
 							<th>
-								<span class="custom-checkbox">
-									<input type="checkbox" id="selectAll">
-									<label for="selectAll"></label>
-								</span>
+
 							</th>
 							<th>Date</th>
 							<th>Heure de Debut</th>
@@ -368,11 +364,7 @@
 							{
 								<tr>
 									<td>
-										<span class="custom-checkbox">
-											<input type="checkbox" id="checkbox@reservation.Id" name="options[]"
-												value="@reservation.Id">
-											<label for="checkbox@reservation.Id"></label>
-										</span>
+
 									</td>
 									<td>@reservation.ReservationDate.Date.ToString("le dd/MM/yyyy")</td>
 									<td>@reservation.ReservationDate.HeureDebut.ToString(@"hh\:mm")</td>
@@ -410,7 +402,6 @@
 	</div>
 
 	<!-- Add Modal HTML -->
-	<!-- Add Modal HTML -->
 	<div id="addReservationModal" class="modal fade">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -422,8 +413,12 @@
 					<div class="modal-body">
 						<div class="form-group">
 							<label>Date</label>
-							<input type="date" id="reservationDate" name="ReservationDate.Date" class="form-control"
-								required>
+							<div class="form-group">
+								<label>Date</label>
+								<input type="date" id="reservationDate" name="ReservationDate.Date" class="form-control"
+									value="@DateTime.Now.ToString("yyyy-MM-dd")" required
+									min="@DateTime.Now.ToString("yyyy-MM-dd")">
+							</div>
 						</div>
 						<div class="form-group">
 							<label>Heure Debut</label>
@@ -528,9 +523,7 @@
 
 	<!-- Edit Modal HTML -->
 
-	### Updated Template:
-	1. **Edit Modal Form:**
-	```html
+
 	<div id="editReservationModal" class="modal fade">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -543,12 +536,18 @@
 						<input type="hidden" name="Id" id="edit-id">
 						<div class="form-group">
 							<label>Date</label>
-							<input type="date" name="ReservationDate.Date" id="edit-date" class="form-control" required>
+							<div class="form-group">
+								<label>Date</label>
+								<input type="date" name="ReservationDate.Date" id="edit-date" class="form-control"
+									required min="@DateTime.Now.ToString("yyyy-MM-dd")">
+							</div>
+
 						</div>
 						<div class="form-group">
 							<label>Heure Debut</label>
 							<select name="ReservationDate.HeureDebut" id="edit-time" class="form-control" required>
-								@for (int hour = 8; hour <= 22; hour += 2)
+								<option value="08:00">08:00</option>
+								@for (int hour = 10; hour <= 22; hour += 2)
 								{
 									<option value="@hour:00">@hour:00</option>
 								}
@@ -583,6 +582,8 @@
 	</div>
 
 
+
+
 	<!-- Delete Modal HTML -->
 	<div id="deleteReservationModal" class="modal fade">
 		<div class="modal-dialog">
@@ -610,59 +611,129 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 	<script>
-		$(document).ready(function () {
-			// Activate tooltip
-			$('[data-toggle="tooltip"]').tooltip();
+		document.addEventListener("DOMContentLoaded", function () {
+			const availableSlots = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ReservationDates, new JsonSerializerSettings
+					 {
+						 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+					 }));
 
-			// Select/Deselect checkboxes
-			var checkbox = $('table tbody input[type="checkbox"]');
-			$("#selectAll").click(function () {
-				if (this.checked) {
-					checkbox.each(function () {
-						this.checked = true;
-					});
+			const dateInput = document.getElementById('reservationDate');
+			const timeSelect = document.getElementById('reservationTime');
+			const terrainSelect = document.getElementById('terrainSelect');
+
+			const editDateInput = document.getElementById('edit-date');
+			const editTimeSelect = document.getElementById('edit-time');
+			const editTerrainSelect = document.getElementById('edit-terrainid');
+
+			dateInput.addEventListener('change', updateAvailableTimes);
+			terrainSelect.addEventListener('change', updateAvailableTimes);
+			editDateInput.addEventListener('change', updateEditAvailableTimes);
+			editTerrainSelect.addEventListener('change', updateEditAvailableTimes);
+
+			function updateAvailableTimes() {
+				const selectedDate = dateInput.value;
+				const selectedTerrain = terrainSelect.value;
+
+				// Clear previous options
+				timeSelect.innerHTML = '<option value="">Select Time</option>';
+
+				if (selectedDate && selectedTerrain) {
+					const reservedTimes = availableSlots
+						.filter(slot => slot.Date.split('T')[0] === selectedDate && slot.TerrainId == selectedTerrain)
+						.map(slot => slot.HeureDebut.split(':').slice(0, 2).join(':'));
+
+					const allTimes = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"];
+
+					const availableTimes = allTimes.filter(time => !reservedTimes.includes(time));
+
+					if (availableTimes.length === 0) {
+						const option = document.createElement('option');
+						option.value = "";
+						option.text = "No available times";
+						option.disabled = true;
+						timeSelect.add(option);
+					} else {
+						availableTimes.forEach(time => {
+							const option = document.createElement('option');
+							option.value = time;
+							option.text = time;
+							timeSelect.add(option);
+						});
+					}
 				} else {
-					checkbox.each(function () {
-						this.checked = false;
-					});
+					const option = document.createElement('option');
+					option.value = "";
+					option.text = "Select a valid date and terrain";
+					option.disabled = true;
+					timeSelect.add(option);
 				}
-			});
-			checkbox.click(function () {
-				if (!this.checked) {
-					$("#selectAll").prop("checked", false);
+			}
+
+			function updateEditAvailableTimes() {
+				const selectedDate = editDateInput.value;
+				const selectedTerrain = editTerrainSelect.value;
+
+				// Clear previous options
+				editTimeSelect.innerHTML = '<option value="">Select Time</option>';
+
+				if (selectedDate && selectedTerrain) {
+					const reservedTimes = availableSlots
+						.filter(slot => slot.Date.split('T')[0] === selectedDate && slot.TerrainId == selectedTerrain)
+						.map(slot => slot.HeureDebut.split(':').slice(0, 2).join(':'));
+
+					const allTimes = ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"];
+
+					const availableTimes = allTimes.filter(time => !reservedTimes.includes(time));
+
+					if (availableTimes.length === 0) {
+						const option = document.createElement('option');
+						option.value = "";
+						option.text = "No available times";
+						option.disabled = true;
+						editTimeSelect.add(option);
+					} else {
+						availableTimes.forEach(time => {
+							const option = document.createElement('option');
+							option.value = time;
+							option.text = time;
+							editTimeSelect.add(option);
+						});
+					}
+				} else {
+					const option = document.createElement('option');
+					option.value = "";
+					option.text = "Select a valid date and terrain";
+					option.disabled = true;
+					editTimeSelect.add(option);
 				}
-			});
+			}
 
-			<script>
-				$(document).ready(function () {
-					// Activate tooltip
-					$('[data-toggle="tooltip"]').tooltip();
-
-				// Fill the edit modal with the current reservation data
-				$('.edit').click(function () {
-			var id = $(this).data('id');
-				var date = $(this).data('date');
-				var time = $(this).data('time');
-				var terrainid = $(this).data('terrainid');
-				var userid = $(this).data('userid');
+			// Fill the edit modal with the current reservation data
+			$('.edit').click(function () {
+				const id = $(this).data('id');
+				const date = $(this).data('dateetheuredebut');
+				const time = $(this).data('time');
+				const terrainid = $(this).data('terrainid');
+				const userid = $(this).data('userid');
 
 				$('#edit-id').val(id);
 				$('#edit-date').val(date);
 				$('#edit-time').val(time);
 				$('#edit-terrainid').val(terrainid);
 				$('#edit-userid').val(userid);
+
+				updateEditAvailableTimes();
+			});
+
+			$('.delete').click(function () {
+				const id = $(this).data('id');
+				$('#delete-id').val(id);
+			});
 		});
-	});
 	</script>
 
 
-	// Fill the delete modal with the current reservation id
-	$('.delete').click(function () {
-	var id = $(this).data('id');
-	$('#delete-id').val(id);
-	});
-	});
-	</script>
+
 </body>
 
 </html>

@@ -1,6 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using terrain.Models;
 
 namespace terrain.Controllers
@@ -8,10 +16,12 @@ namespace terrain.Controllers
     public class UserAuthController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public UserAuthController(ApplicationDbContext context)
+        public UserAuthController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         // View for Register
@@ -46,10 +56,9 @@ namespace terrain.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View("~/Views/User/Auth/Login.cshtml");
+            return View("~/Views/User/Auth/login.cshtml");
         }
 
-        // Handling login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(UserLoginModel model)
@@ -59,13 +68,45 @@ namespace terrain.Controllers
                 var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == model.Email);
                 if (user != null && BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
                 {
-                    // Simulating token generation for demonstration purposes
-                    TempData["Message"] = "Login successful!";
-                    return RedirectToAction("Index", "Home");
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(new[]
+                        {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.Name, user.Nom)
+                }),
+                        Expires = DateTime.UtcNow.AddHours(1),
+                        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                    };
+                    var token = tokenHandler.CreateToken(tokenDescriptor);
+                    var tokenString = tokenHandler.WriteToken(token);
+
+                    // Store the user ID in the session
+                    HttpContext.Session.SetInt32("UserId", user.Id);
+
+                    // Redirect to the user reservation page with token and user ID as query parameters
+                    return RedirectToAction("UserIndex", "Reservations", new { token = tokenString, userId = user.Id });
                 }
                 ModelState.AddModelError("", "Invalid login attempt.");
             }
-            return View("~/Views/User/Auth/Login.cshtml", model);
+            return View(model);
+        }
+
+
+
+
+
+
+        // Handling logout
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login");
         }
     }
 

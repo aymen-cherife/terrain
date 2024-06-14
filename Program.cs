@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -7,9 +8,19 @@ using terrain.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0, 21))));
+
+// Add session services
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -42,6 +53,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Use session and authentication
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -49,8 +63,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-//User routes : 
-
+// User routes
 app.MapControllerRoute(
     name: "user_register",
     pattern: "User/Register",
@@ -60,23 +73,27 @@ app.MapControllerRoute(
     name: "user_login",
     pattern: "User/Login",
     defaults: new { controller = "UserAuth", action = "Login" });
-//Manager routes : 
-app.MapControllerRoute(
-name: "manager_login",
-pattern: "Manager/Login",
-defaults: new { controller = "ManagerAuth", action = "Login" });
-
-//Terrain routes : 
 
 app.MapControllerRoute(
-name: "Terrain_CRUD_table",
-pattern: "Manager/Terrains",
-defaults: new { controller = "Terrains", action = "Index" });
+    name: "user_reservations",
+    pattern: "User/Reservations",
+    defaults: new { controller = "Reservations", action = "UserIndex" });
 
-//Reservation routes : 
+// Manager routes
+app.MapControllerRoute(
+    name: "manager_login",
+    pattern: "Manager/Login",
+    defaults: new { controller = "ManagerAuth", action = "Login" });
 
 app.MapControllerRoute(
-name: "Reservation_CRUD_table",
-pattern: "Manager/Reservations",
-defaults: new { controller = "Reservations", action = "ManagerIndex" });
+    name: "manager_reservations",
+    pattern: "Manager/Reservations",
+    defaults: new { controller = "Reservations", action = "ManagerIndex" });
+
+// Terrain routes
+app.MapControllerRoute(
+    name: "terrain_crud_table",
+    pattern: "Manager/Terrains",
+    defaults: new { controller = "Terrains", action = "Index" });
+
 app.Run();
